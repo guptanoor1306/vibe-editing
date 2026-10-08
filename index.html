@@ -1,0 +1,375 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Vibe Editing Cheat Sheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: an edit timeline. Nine stages run left to right like clips on a track; each stage stacks its step tiles. A step opens a bottom drawer with tabs, so little text shows at once. Light only. */
+:root{
+  color-scheme:light;
+  --bg:#F2F3F6; --surface:#FFFFFF; --ink:#151821; --muted:#5E6577; --line:#DCE0E8; --track:#C9CFDB;
+  --accent:#3550D0; --accent-soft:#E8ECFC;
+  --auto:#15784A; --auto-soft:#E1F3E9; --draft:#3550D0; --draft-soft:#E8ECFC; --assist:#985800; --assist-soft:#FBEDD6;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--body);font-size:15px;line-height:1.55}
+.wrap{max-width:1240px;margin:0 auto;padding:36px 20px 48px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;letter-spacing:-.01em}
+h1{font-size:clamp(28px,4.4vw,40px);line-height:1.1}
+.top{display:flex;flex-wrap:wrap;gap:16px 32px;align-items:flex-end;justify-content:space-between}
+.lead{max-width:58ch;color:var(--muted);margin:10px 0 0;font-size:15.5px}
+.lead b{color:var(--ink);font-weight:600}
+code{font-family:var(--mono);font-size:.88em;background:var(--accent-soft);padding:1px 5px;border-radius:4px}
+button{font-family:var(--body)}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.bar{display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center;margin:20px 0 14px;font-size:12.5px;color:var(--muted)}
+.bar .hint{margin-left:auto}
+.key b{color:var(--ink);font-weight:600}
+.key{display:inline-flex;align-items:center;gap:6px}
+.dot{width:9px;height:9px;border-radius:50%;flex:none}
+.dot[data-l="3"]{background:var(--auto)} .dot[data-l="2"]{background:var(--draft)} .dot[data-l="1"]{background:var(--assist)}
+.ghost{background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:6px 14px;font-size:13px;font-weight:500;cursor:pointer}
+.ghost:hover{border-color:var(--accent)}
+
+.levels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:22px}
+.lvl{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13px;line-height:1.4}
+.lvl .dot{margin-top:5px}
+.lvl b{display:block;font-weight:600;font-size:13.5px}
+.lvl span:not(.dot){color:var(--muted)}
+.lvl-note{font-size:12.5px;color:var(--muted)}
+@media (max-width:700px){.levels{grid-template-columns:minmax(0,1fr)}}
+/* the timeline */
+.scroller{overflow-x:auto;padding-bottom:12px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+.track{display:grid;grid-auto-flow:column;grid-auto-columns:176px;gap:12px;position:relative;padding-top:6px;min-width:max-content}
+.stage{scroll-snap-align:start;display:flex;flex-direction:column;gap:8px}
+.stage-head{position:relative;padding:0 0 12px}
+.stage-head::after{content:"";position:absolute;left:0;right:-12px;bottom:0;height:4px;background:var(--track);border-radius:2px}
+.stage:last-child .stage-head::after{right:0}
+.stage-head .tc{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:.04em}
+.stage-head h2{font-size:16px;line-height:1.2;margin-top:2px;min-height:2.4em}
+.tile{all:unset;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 11px;display:flex;flex-direction:column;gap:8px;min-height:74px;transition:border-color .12s, transform .12s}
+.tile:hover{border-color:var(--accent);transform:translateY(-1px)}
+.tile:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tile[aria-expanded="true"]{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.tile .row{display:flex;justify-content:space-between;align-items:center}
+.tile .n{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.tile .name{font-weight:500;font-size:14px;line-height:1.3}
+
+/* drawer */
+.backdrop{position:fixed;inset:0;background:rgba(21,24,33,.28);z-index:20}
+.drawer{position:fixed;left:0;right:0;bottom:0;z-index:21;background:var(--surface);border-radius:16px 16px 0 0;box-shadow:0 -10px 40px rgba(21,24,33,.18);max-height:min(78vh,720px);display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom,0px)}
+.drawer-in{max-width:880px;width:100%;margin:0 auto;display:flex;flex-direction:column;min-height:0;flex:1}
+.grab{width:40px;height:4px;border-radius:2px;background:var(--line);margin:10px auto 0}
+.d-head{padding:14px 24px 0;display:flex;gap:16px;align-items:flex-start;justify-content:space-between}
+.eyebrow{font-family:var(--mono);font-size:11.5px;color:var(--accent);letter-spacing:.04em;text-transform:uppercase}
+.d-head h3{font-size:24px;line-height:1.15;margin-top:4px}
+.x{all:unset;cursor:pointer;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line);font-size:18px;line-height:1;flex:none}
+.x:hover{border-color:var(--ink)}
+.x:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.facts{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:14px 24px 0}
+.fact{font-size:12.5px;border:1px solid var(--line);border-radius:999px;padding:4px 10px;color:var(--muted)}
+.fact b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.pill{font-size:12.5px;font-weight:600;padding:4px 10px;border-radius:999px}
+.pill[data-l="3"]{background:var(--auto-soft);color:var(--auto)}
+.pill[data-l="2"]{background:var(--draft-soft);color:var(--draft)}
+.pill[data-l="1"]{background:var(--assist-soft);color:var(--assist)}
+.tabs{display:flex;gap:4px;padding:16px 24px 0;border-bottom:1px solid var(--line);overflow-x:auto}
+.tab{all:unset;cursor:pointer;padding:8px 12px;font-size:13.5px;font-weight:500;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--ink);border-color:var(--accent)}
+.tab:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.d-body{overflow:auto;padding:18px 24px 8px;min-height:0;flex:1}
+.d-body p{margin:0 0 12px;max-width:68ch}
+.d-body ul,.d-body ol{margin:0 0 12px;padding-left:20px;display:flex;flex-direction:column;gap:7px;max-width:68ch}
+.d-body h4{font:600 11.5px var(--body);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:16px 0 8px}
+.d-body h4:first-child{margin-top:0}
+.plain{background:var(--accent-soft);border-radius:8px;padding:12px 14px;margin-top:4px}
+.plain h4{color:var(--accent);margin-top:0}
+.plain p{margin:0}
+.muted{color:var(--muted)}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:8px;margin-bottom:12px}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--bg)}
+tr:last-child td{border-bottom:0}
+.d-foot{display:flex;justify-content:space-between;gap:12px;padding:12px 24px 16px;border-top:1px solid var(--line)}
+.d-foot button{background:none;border:1px solid var(--line);color:var(--ink);border-radius:6px;padding:7px 12px;font-size:13px;font-weight:500;cursor:pointer;max-width:48%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.d-foot button:hover:not(:disabled){border-color:var(--accent)}
+.d-foot button:disabled{opacity:.35;cursor:default}
+.gloss td:first-child{font-weight:600;white-space:nowrap}
+body.locked{overflow:hidden}
+
+@media (max-width:600px){
+  .d-head,.facts,.tabs,.d-body,.d-foot{padding-left:16px;padding-right:16px}
+  .d-head h3{font-size:20px}
+  .track{grid-auto-columns:158px}
+}
+@media (prefers-reduced-motion:no-preference){
+  .drawer:not([hidden]){animation:up .22s cubic-bezier(.2,.8,.2,1)}
+  .backdrop:not([hidden]){animation:fade .2s ease-out}
+  @keyframes up{from{transform:translateY(40px);opacity:.6}to{transform:none;opacity:1}}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+}
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>Vibe Editing Cheat Sheet</h1>
+      <p class="lead"><b>AI makes the decisions</b>, <b>templates and code</b> do the work. 25 editing steps across 9 stages; pick a step to see how it's done.</p>
+    </div>
+  </div>
+
+  <div class="bar">
+    <span class="key" title="AI or a script does it. A person only spot-checks."><span class="dot" data-l="3"></span><b>Auto</b> person spot-checks</span>
+    <span class="key" title="AI makes a first version. A person fixes and approves it."><span class="dot" data-l="2"></span><b>AI draft</b> person fixes it</span>
+    <span class="key" title="AI helps prepare. A person still does the main work."><span class="dot" data-l="1"></span><b>AI assist</b> person does the work</span>
+    <span class="hint">Scroll sideways →</span>
+    <button class="ghost" id="open-gloss">Tech terms</button>
+  </div>
+
+  <div class="scroller"><div class="track" id="track"></div></div>
+</div>
+
+<div class="backdrop" id="backdrop" hidden></div>
+<section class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="d-title" hidden>
+  <div class="grab" aria-hidden="true"></div>
+  <div class="drawer-in" id="drawer-in"></div>
+</section>
+
+<script>
+const STAGES = [
+ {id:1,name:"Plan the video",sub:"Pre-production",
+  plain:"The AI reads the script, splits it into small moments, and writes down which graphic goes where and what text it shows. It only picks from designs you already have. If nothing fits, it says so instead of making something up.",
+  lead:"This is where most tokens should be spent, because every later step follows the plan made here.",
+  need:"An LLM account, a written system prompt (role, rules, template catalog, examples), a JSON schema for the edit plan, and a spreadsheet or folder of tagged assets."},
+ {id:2,name:"Set up the project",sub:"Ingest and project setup",
+  plain:"A script creates the Premiere project with the same folders, names and settings every time, and puts the footage in the right place. No thinking needed, so no AI needed.",
+  lead:"This is mostly rules, not intelligence, so a script does it better and cheaper than an LLM.",
+  need:"A template <code>.prproj</code>, a naming convention document, Media Encoder presets, and a small script (ExtendScript/UXP inside Premiere, or Python outside it) to copy and import."},
+ {id:3,name:"Build the rough cut",sub:"Assembly",
+  plain:"The AI turns speech into text with exact timings. Then cutting becomes like editing a document: delete a sentence and the video cut follows. It picks the best take, puts clips in script order, and removes pauses and “um”s.",
+  lead:"The transcript is the backbone: once every word has a timecode, cutting becomes text editing.",
+  need:"A transcription tool with word timecodes, the script as text, a tagged B-roll library, and a script that turns in/out points into cuts (via XML or Premiere scripting)."},
+ {id:4,name:"Add graphics",sub:"On-screen text, templates, layered PSDs",
+  plain:"Each design is saved once as a template with blank text boxes. The AI just fills the boxes (a number, a label, an icon), so fonts and colours always stay on brand. Photoshop files work the same way: same layers, new text.",
+  lead:"Graphics are cheap with AI only when every design already exists as a template with named slots; the AI then fills slots instead of designing.",
+  need:"Templates with named slots, a rule sheet of max characters per slot, master PSDs with clean layer names, and one script per output type."},
+ {id:5,name:"Add animation",sub:"Motion graphics",
+  plain:"Every move you use (pop-in, slide, number counting up, bar growing) is saved once as a ready-made preset. The AI picks the preset and timing; the animator can still drag the keyframes afterwards.",
+  lead:"Animation becomes cheap when every move comes from a toolkit where each preset already has its code; the AI picks a preset and fills values instead of keyframing.",
+  need:"A list of approved moves, each saved as an AE preset plus a script snippet, and template <code>.aep</code> files with consistently named layers."},
+ {id:6,name:"Turn the plan into a real file",sub:"Storyboard to Premiere / After Effects",
+  plain:"The AI's instructions are a short list. A simple program reads that list and builds a Premiere or After Effects file the editor opens and fixes like any normal project. Every fix teaches the AI for next time.",
+  lead:"The AI never writes the Premiere or AE file itself: it writes a small JSON plan, and a compiler script (no AI, free to run) turns that plan into the file.",
+  need:"The edit plan JSON schema, a validator, a compiler script (Python or JavaScript) per output type, and template <code>.prproj</code> / <code>.aep</code> files."},
+ {id:7,name:"Fix the sound",sub:"Audio",
+  plain:"Tools clean up the voice and set the volume level automatically. The AI suggests music by mood, and sound effects are added by rule (a whoosh on every transition).",
+  lead:"Audio cleanup and loudness are already near-automatic in today's tools; music and SFX choice is where AI drafts and a person approves.",
+  need:"A cleanup preset per recording room, a tagged music and SFX library with rights cleared, SFX rules in the compiler, and a loudness preset on export."},
+ {id:8,name:"Add captions",sub:"Captions, translation, reframing",
+  plain:"Captions come from the same speech-to-text, checked against the script so names and numbers are spelled right. The same goes for translation, and for turning a wide video into a vertical one.",
+  lead:"Captions come almost free once the transcript exists; the human job is checking names and numbers.",
+  need:"A caption template per format, a caption-splitting rule, a finance glossary, and 9:16 versions of the graphic templates."},
+ {id:9,name:"Check and deliver",sub:"Colour, QC, export",
+  plain:"Colour gets a consistent starting look; the final look stays human. A checker compares every number on screen with the script, spots spelling mistakes, blank frames and wrong volume, then exports every version with the right names.",
+  lead:"QC is the step with the most hidden value: an automated check runs alongside the edit and catches the errors that are most costly in finance content.",
+  need:"LUTs per set, a QC checklist turned into scripts, export presets, and a naming convention."}
+];
+
+const STEPS = [
+ {n:1,st:1,name:"Script breakdown",does:"Splits script into beats, tags each beat type",l:3,saved:"70–90%",tech:"LLM + system prompt with beat skeleton",
+  how:["Give the LLM the script plus a beat skeleton for the format (e.g. IPO short form: hook, reveal, business, standout, risk, financials, issue, use of funds, dates, CTA).","Ask for each beat's type, start and end line, and key numbers pulled out as data.","Rule: numbers are copied, never invented; any calculated number is flagged <code>derived</code> for a human check."]},
+ {n:2,st:1,name:"Storyboard / shot list",does:"Maps each beat to a template, writes on-screen text",l:2,saved:"50–70%",tech:"LLM, template catalog, EDL JSON schema",
+  how:["Output is an EDL (edit decision list) in JSON: one row per beat with template ID, text slots, layer (footage, overlay, full-screen board) and notes.","The AI only chooses from a fixed template catalog. If nothing fits, it returns <code>NEW</code> with a description instead of inventing a design.","Keep on-screen text short (≤ 6 words) and in house style (₹, Indian number format)."]},
+ {n:3,st:1,name:"Asset sourcing",does:"Finds logos, icons, stock; flags what's missing",l:2,saved:"30–50%",tech:"Tagged asset library, search, image generation",
+  how:["Keep one asset library: logos, icons, characters, building illustrations, stock, each with tags.","The AI searches by tag and lists what it could not find (e.g. a company logo), so a person fetches only that.","Image generation is useful for backgrounds and B-roll stills; avoid it for logos, real people and data."]},
+ {n:4,st:2,name:"Project setup and organization",does:"Creates project, bins, naming, sequence presets",l:3,saved:"80–95%",tech:"Template project + Premiere script or XML",
+  how:["Build one template project per IP: bins (Footage, Audio, Graphics, Music, SFX, Exports), sequence presets (16:9 and 9:16), track layout (V1 footage, V2 B-roll, V3 graphics, V4 captions).","A script copies the template, renames it (e.g. <code>ZO_IPO_SF_VarmoraGranito_2026-10</code>) and imports media into the right bins by file type and name.","Use a fixed naming convention for every file; it's what lets the AI find things later without reading the media."]},
+ {n:5,st:2,name:"Ingest, proxies, transcoding",does:"Copies, renames, makes proxies",l:3,saved:"70–90%",tech:"Media Encoder watch folders, FFmpeg",
+  how:["A watch folder in Media Encoder (or an FFmpeg script) picks up new card dumps, makes proxies and renames files.","Check frame rate and resolution on ingest; mismatches are a common cause of broken XML imports later."]},
+ {n:6,st:3,name:"Transcription",does:"Word-level transcript with timecodes",l:3,saved:"90%+",tech:"Whisper, Premiere Speech to Text",
+  how:["Run Whisper or Premiere's Speech to Text to get word-level timecodes.","Hinglish and finance terms (GMP, OFS, CAGR, company names) need a custom vocabulary list or a correction pass."]},
+ {n:7,st:3,name:"Syncing and aligning clips",does:"Syncs audio/video, orders clips not shot in sequence",l:3,saved:"70–90%",tech:"Waveform sync, transcript-to-script matching",
+  how:["Audio sync: match camera audio to the external mic by waveform (Premiere's Synchronize does this).","Out-of-order clips: match each clip's transcript to the script lines, then sort clips in script order. This is a text-matching job, cheap to run."]},
+ {n:8,st:3,name:"Rough cut / take selection",does:"Picks best take per line, assembles in script order",l:2,saved:"50–70%",tech:"Transcript alignment + LLM judgment",
+  how:["When a line was recorded several times, the AI compares takes by completeness (all words said), fluency (fewest fillers) and position (usually the last good take).","Output is a list of in/out points per line, not edits in Premiere directly."]},
+ {n:9,st:3,name:"Silence, filler and retake removal",does:"Cuts pauses, “um”, false starts",l:3,saved:"70–90%",tech:"Text-based editing, silence detection",
+  how:["Detect silences over a threshold (e.g. 0.4 s) and filler words from the transcript, then cut them.","Leave a few frames of breath at each cut; zero-gap cuts sound robotic."]},
+ {n:10,st:6,name:"Repetitive timeline work",does:"Same transitions, markers, sequencing, track layout",l:3,saved:"70–90%",tech:"Premiere scripting (ExtendScript/UXP), XML",
+  how:["All of it goes into the same compiler that builds the file, so nothing is done click by click.","The same transition on every cut.","A marker per beat, named after the beat type, so the editor can jump between them.","J/L cuts and a fixed track layout."]},
+ {n:11,st:4,name:"On-screen text and graphics",does:"Fills template text slots, places on timeline",l:2,saved:"50–80%",tech:"MOGRTs / AE templates with named slots",
+  how:["Turn each design (from Figma) into a MOGRT (Premiere) or an AE template with named text fields, e.g. <code>value</code>, <code>label</code>, <code>icon</code>.","Name the template the same as its Figma cell (e.g. <code>IPO_OSA_TEXT_ICON</code>), so the design board doubles as the catalog.","The AI writes only the slot values; the template keeps fonts, colours and animation consistent."]},
+ {n:12,st:4,name:"Layered PSD generation",does:"Builds PSD with named, editable layers",l:2,saved:"40–70%",tech:"psd-tools / ag-psd, Photoshop scripting",ordered:true,
+  how:["Start from a master PSD per graphic type, with every element on its own named layer (<code>bg</code>, <code>headline</code>, <code>number</code>, <code>icon</code>, <code>logo</code>).","The AI outputs the content per layer as JSON (text, which icon, which colour variant).","A script opens the master, swaps text and images by layer name, and saves a new PSD. Layers stay editable.","Options: Photoshop scripting (most faithful, needs Photoshop running), the Photoshop API (cloud), or open-source libraries (<code>psd-tools</code> in Python reads well but writes text layers poorly; <code>ag-psd</code> in JavaScript can write them).","Import the PSD into Premiere or AE as a layered composition, so editors can still move each part."],
+  watch:"Fonts missing on the machine that opens the file, text overflowing a box (set max characters per slot), and Figma-to-PSD exports that flatten layers."},
+ {n:13,st:5,name:"Animation and motion graphics",does:"Picks preset from toolkit, fills values, sets timing",l:2,saved:"40–70%",tech:"Motion toolkit with code, AE .jsx, Lottie, Remotion",
+  pre:{title:"Build the motion toolkit first",items:["List the moves your IP actually uses: pop-in, slide-up, count-up number, bar grow, pie fill, map highlight, line draw, wipe.","Store each as a preset with its code and its knobs: duration, delay, easing, start/end value.","Same preset, three forms: an AE animation preset (<code>.ffx</code>) or expression, a <code>.jsx</code> snippet that applies it, and (optional) a Lottie or Remotion version for web/code renders."]},
+  ordered:true,
+  how:["The edit plan names the preset: <code>{\"template\": \"IPO_DATA_BAR\", \"anim\": \"bar_grow\", \"duration\": 0.6}</code>.","A compiler writes a <code>.jsx</code> script that opens the AE template, fills text, applies the preset, and sets keyframes at the right times.","Result: real keyframes with drag handles in AE, so the animator can retime or re-ease by hand."],
+  table:{title:"Three ways to output animation",head:["Route","Editable in","Best for","Limit"],rows:[
+   ["AE <code>.jsx</code> script on a template <code>.aep</code>","After Effects, fully","Full-screen boards, charts, maps","Needs AE open to run the script"],
+   ["MOGRT with exposed controls","Premiere, via Essential Graphics","Repeated overlays (OST, lower thirds)","Only the controls the designer exposed"],
+   ["Lottie / Remotion (code)","Code, not AE keyframes","Fast batch renders, web","Editor gets a rendered clip, not keyframes"]]},
+  watch:"Keep bespoke hero animations, character acting and anything new to the IP human. Use AI there only to draft a timing sheet."},
+ {n:14,st:6,name:"Storyboard to editable file",does:"Compiles the plan into Premiere XML or AE project",l:3,saved:"60–80%",tech:"Compiler script, FCP XML / OTIO, AE .jsx",ordered:true,
+  how:["Storyboard or script → LLM with the system prompt → edit plan JSON (beats, timecodes, template IDs, text, animation presets).","Validate the JSON: every template ID exists, text fits its slot, every number matches the script.","Compiler turns the JSON into the target file. <b>Premiere:</b> an FCP7 XML (<code>xmeml</code>) or OpenTimelineIO file with tracks, cuts, footage, graphics, markers and transitions; File → Import. <b>After Effects:</b> a <code>.jsx</code> script that opens a template <code>.aep</code>, builds comps, fills text and applies presets; File → Scripts → Run.","Editor opens the result and fixes what's off. Their changes become new examples for the system prompt."],
+  extra:{title:"Known limits to test first",items:["<code>.aep</code> is a binary format; nothing writes it directly. The <code>.jsx</code> route is the reliable one.","FCP XML carries cuts, clips, stills and basic transitions reliably. Editable MOGRT text through XML is not reliable; test it. Fallbacks: pre-render graphics as ProRes 4444 with alpha, or run a small Premiere script after import that inserts MOGRTs and sets their text.","Frame rate and timecode base must match between the JSON and the sequence, or every cut drifts.","Live control (Premiere driven through a plugin panel, one tool call per cut) works, but costs tokens per action and breaks when the panel isn't running. Writing one file is cheaper and sturdier."]}},
+ {n:15,st:3,name:"B-roll placement",does:"Matches B-roll to what is being said",l:2,saved:"40–60%",tech:"Tagged library, embedding search",
+  how:["Tag the B-roll library by subject (factory, railway track, tiles, office, trading screen).","The AI reads what is said in each beat and searches the library by meaning, not just exact words (embedding search).","It proposes one or two clips per beat on the B-roll track; the editor swaps any that don't fit."]},
+ {n:16,st:7,name:"Audio cleanup",does:"Removes noise, echo, levels voice",l:3,saved:"70–90%",tech:"Enhance Speech, noise reduction plugins",
+  how:["Run speech enhancement (Premiere's Enhance Speech or a noise-reduction plugin) on the voice track.","Use a mix amount below 100% so the voice doesn't sound processed; set it once per room and reuse."]},
+ {n:17,st:7,name:"Music and SFX",does:"Picks track by mood, places SFX on cuts and pops",l:2,saved:"40–60%",tech:"Tagged music/SFX library, beat detection",
+  how:["Tag the music library by mood, tempo and IP (e.g. <code>ipo_sf_upbeat_110bpm</code>). The AI picks by tag from the script's tone.","SFX are placed by rule from the edit plan: a whoosh on every board transition, a pop on every number reveal. That is pure compiler work.","Beat detection can snap cuts or graphic entries to the music; optional."]},
+ {n:18,st:7,name:"Mixing and loudness",does:"Ducks music under voice, hits loudness target",l:3,saved:"70–90%",tech:"Auto-ducking, loudness normalization",
+  how:["Auto-ducking lowers music under voice.","Normalize the master to a loudness target (−14 LUFS is a common target for YouTube and social; confirm against your platform's spec)."]},
+ {n:19,st:8,name:"Captions and subtitles",does:"Generates, splits, styles captions",l:3,saved:"70–90%",tech:"Speech to Text, SRT, caption template",
+  how:["Generate captions from the transcript, then split by rule: max 2 lines, max ~32 characters per line, break at natural pauses.","For short form, use word-by-word animated captions from a caption template (highlight colour = IP accent).","Correct against the script, not by ear: the script has the right spellings of company names and figures.","Export an <code>.srt</code> for platforms alongside burned-in captions."]},
+ {n:20,st:8,name:"Translation and dubbing",does:"Translates captions, optional AI voice",l:2,saved:"50–70%",tech:"LLM translation, voice cloning (with consent)",
+  how:["LLM translation of the SRT, with a glossary of finance terms that should stay in English.","AI voice dubbing only with the presenter's consent, and with a native speaker reviewing."]},
+ {n:21,st:8,name:"Reframing (16:9 to 9:16)",does:"Tracks face/subject, re-crops",l:2,saved:"60–80%",tech:"Auto Reframe, face tracking",
+  how:["Auto Reframe or face tracking re-crops footage; graphics should not be re-cropped. Use separate 9:16 versions of each template.","Check safe zones: platform UI covers the bottom and right edges in vertical video."]},
+ {n:22,st:9,name:"Colour grading",does:"Applies base LUT, matches shots",l:1,saved:"30–50%",tech:"LUTs per camera/set, shot matching",
+  how:["AI gets you a consistent base, not a look. Build one LUT per camera and set, apply it by rule on import, and auto-match shots to a reference frame.","The final look, skin tones and mixed lighting stay with the colourist."]},
+ {n:23,st:9,name:"QC",does:"Checks spelling, numbers, black frames, loudness, safe zones",l:2,saved:"40–60%",tech:"Check scripts + LLM review against script",
+  how:["Runs in parallel with the edit, not only at the end.","Most checks are scripts; the final watch-through stays human."],
+  table:{title:"What gets checked",head:["Check","How","Automated?"],rows:[
+   ["Every on-screen number matches the script","Compare edit-plan text slots with script figures","Yes"],
+   ["Spelling of names, terms, ₹ format","Glossary + LLM pass on all text","Yes"],
+   ["Black frames, flash frames, gaps on timeline","Scan the XML or the render","Yes"],
+   ["Loudness and peaks","Loudness meter on export","Yes"],
+   ["Text inside safe zones","Template rules + frame check","Mostly"],
+   ["Captions match audio","Transcript vs caption text","Yes"],
+   ["Compliance lines and disclaimers present","Checklist per IP","Yes"],
+   ["Does it look and feel right","Human watch-through","No"]]}},
+ {n:24,st:9,name:"Export and delivery",does:"Renders all formats, names, uploads",l:3,saved:"80–90%",tech:"Media Encoder presets, render scripts",
+  how:["One Media Encoder preset per platform (YouTube 16:9, Shorts/Reels 9:16), queued by script, files named by convention.","Optional: auto-upload as draft with title and description drafted by the LLM from the script."]},
+ {n:25,st:9,name:"Thumbnails",does:"Drafts thumbnail options from template",l:2,saved:"30–60%",tech:"PSD/Figma template + image tools",
+  how:["Same layered PSD route as graphics (step 12).","The AI drafts 3 options (text + frame choice); a designer picks and polishes."]}
+];
+
+const GLOSS = [
+ ["LLM","The AI model that reads the script and makes decisions","1, 2, 8, 23"],
+ ["System prompt","Fixed instructions the AI gets every time: role, rules, template list, examples","Every AI step"],
+ ["Prompt caching","Reusing the unchanged part of the prompt at a lower price","Cuts cost per video"],
+ ["EDL (edit decision list)","The plan: one row per beat with timing, template, text","The handoff between AI and code"],
+ ["JSON","A plain-text format for structured data; how the EDL is written","2, 13, 14"],
+ ["Template catalog","List of approved designs, each with an ID and its text slots","2, 11"],
+ ["MOGRT","Motion graphics template for Premiere with editable controls","11"],
+ ["FCP7 XML (xmeml)","A timeline file Premiere can import: tracks, clips, cuts","14"],
+ ["OpenTimelineIO (OTIO)","An open timeline format that converts to several editors' formats","14"],
+ ["ExtendScript / UXP","Adobe's scripting languages to control Premiere, AE and Photoshop","4, 10, 12, 13"],
+ [".jsx","An ExtendScript file; run it in AE to build comps and keyframes","13, 14"],
+ ["Expression","A small piece of code on an AE property that drives animation","13"],
+ ["Lottie","Animation stored as JSON, played in apps and on the web","13"],
+ ["Remotion","Makes videos from React code; renders frame by frame","13"],
+ ["Whisper","Open speech-to-text model with word timecodes","6"],
+ ["FFmpeg","Free command-line tool to convert, cut and inspect video and audio","5, 9, 23"],
+ ["psd-tools / ag-psd","Code libraries that read and write layered Photoshop files","12"],
+ ["MCP","A standard way for AI to call tools in other apps (Premiere, Figma)","Live control, optional"],
+ ["LUFS","Unit of perceived loudness; platforms normalize to a target","18"],
+ ["Validator","A script that checks the AI's plan before it's compiled","14"]
+];
+
+const $ = s => document.querySelector(s);
+const LVL = {3:"Auto",2:"AI draft",1:"AI assist"};
+const LVL_NOTE = {3:"AI or a script does it. A person only spot-checks.",2:"AI makes a first version. A person fixes and approves it.",1:"AI helps prepare. A person still does the main work."};
+const byN = [...STEPS].sort((a,b)=>a.n-b.n);
+let current = null, tab = "overview", lastFocus = null;
+
+$("#track").innerHTML = STAGES.map(st => {
+  const items = STEPS.filter(s=>s.st===st.id).sort((a,b)=>a.n-b.n);
+  return `<section class="stage"><div class="stage-head"><div class="tc">STAGE ${String(st.id).padStart(2,"0")}</div><h2>${st.name}</h2></div>${
+    items.map(s=>`<button class="tile" id="tile-${s.n}" data-n="${s.n}" aria-expanded="false" aria-controls="drawer">
+      <span class="row"><span class="n">${String(s.n).padStart(2,"0")}</span><span class="dot" data-l="${s.l}" title="${LVL[s.l]}"></span></span>
+      <span class="name">${s.name}</span></button>`).join("")
+  }</section>`;
+}).join("");
+
+const ul = (items, ordered) => { const t = ordered?"ol":"ul"; return `<${t}>${items.map(i=>`<li>${i}</li>`).join("")}</${t}>`; };
+const tbl = t => `<h4>${t.title}</h4><div class="tbl"><table><thead><tr>${t.head.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${t.rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+
+function body(s, st){
+  if(tab==="overview") return `<h4>What AI does</h4><p>${s.does}.</p>
+    <div class="plain"><h4>In plain words</h4><p>${st.plain}</p></div>`;
+  if(tab==="how") return `<p class="muted">${st.lead}</p>
+    ${s.pre ? `<h4>${s.pre.title}</h4>${ul(s.pre.items)}` : ""}
+    <h4>Steps</h4>${ul(s.how, s.ordered)}
+    ${s.table ? tbl(s.table) : ""}
+    ${s.extra ? `<h4>${s.extra.title}</h4>${ul(s.extra.items)}` : ""}
+    ${s.watch ? `<h4>Watch out for</h4><p>${s.watch}</p>` : ""}`;
+  return `<h4>Tools for this step</h4><p>${s.tech}</p><h4>What you need, in basic terms</h4><p>${st.need}</p>`;
+}
+
+function renderStep(){
+  const s = STEPS.find(x=>x.n===current), st = STAGES.find(x=>x.id===s.st);
+  const i = byN.indexOf(s), prev = byN[i-1], next = byN[i+1];
+  const tabs = [["overview","Overview"],["how","How it's done"],["need","What you need"]];
+  $("#drawer-in").innerHTML = `
+    <div class="d-head"><div><div class="eyebrow">Step ${String(s.n).padStart(2,"0")} · ${st.name}</div><h3 id="d-title">${s.name}</h3></div>
+      <button class="x" id="d-close" aria-label="Close">×</button></div>
+    <div class="facts"><span class="pill" data-l="${s.l}">${LVL[s.l]}</span><span class="fact">Est. time saved <b>${s.saved}</b></span><span class="lvl-note">${LVL_NOTE[s.l]}</span></div>
+    <div class="tabs" role="tablist">${tabs.map(([k,v])=>`<button class="tab" role="tab" id="tab-${k}" data-t="${k}" aria-selected="${k===tab}">${v}</button>`).join("")}</div>
+    <div class="d-body" id="d-body" role="tabpanel" aria-labelledby="tab-${tab}">${body(s, st)}</div>
+    <div class="d-foot">
+      <button id="d-prev" ${prev?`data-n="${prev.n}"`:"disabled"}>← ${prev?prev.name:"Start"}</button>
+      <button id="d-next" ${next?`data-n="${next.n}"`:"disabled"}>${next?next.name:"End"} →</button>
+    </div>`;
+}
+
+function renderGloss(){
+  $("#drawer-in").innerHTML = `
+    <div class="d-head"><div><div class="eyebrow">Reference</div><h3 id="d-title">Tech terms, in basic words</h3></div>
+      <button class="x" id="d-close" aria-label="Close">×</button></div>
+    <div class="d-body" style="padding-top:16px"><div class="tbl gloss"><table><thead><tr><th>Term</th><th>What it is</th><th>Steps</th></tr></thead><tbody>${
+      GLOSS.map(g=>`<tr><td>${g[0]}</td><td>${g[1]}</td><td style="font-family:var(--mono);font-size:12.5px">${g[2]}</td></tr>`).join("")
+    }</tbody></table></div></div>`;
+}
+
+function setExpanded(){ document.querySelectorAll(".tile").forEach(t=>t.setAttribute("aria-expanded", String(+t.dataset.n===current))); }
+
+function openDrawer(){
+  if($("#drawer").hidden){ lastFocus = document.activeElement; }
+  $("#drawer").hidden = false; $("#backdrop").hidden = false; document.body.classList.add("locked");
+  setExpanded();
+  const c = $("#d-close"); c && c.focus({preventScroll:true});
+}
+function closeDrawer(){
+  $("#drawer").hidden = true; $("#backdrop").hidden = true; document.body.classList.remove("locked");
+  current = null; setExpanded();
+  try{ history.replaceState(null,"",location.pathname + location.search); }catch(e){}
+  lastFocus && lastFocus.focus && lastFocus.focus({preventScroll:true});
+}
+function openStep(n, keepTab){
+  current = n; if(!keepTab) tab = "overview";
+  renderStep(); openDrawer();
+  const t = $("#tile-"+n); t && t.scrollIntoView({block:"nearest", inline:"nearest"});
+  try{ history.replaceState(null,"","#step-"+n); }catch(e){}
+}
+
+$("#track").addEventListener("click", e => { const t = e.target.closest(".tile"); if(t) openStep(+t.dataset.n); });
+$("#open-gloss").addEventListener("click", () => { current = null; renderGloss(); openDrawer(); });
+$("#backdrop").addEventListener("click", closeDrawer);
+$("#drawer").addEventListener("click", e => {
+  if(e.target.closest("#d-close")) return closeDrawer();
+  const tb = e.target.closest(".tab"); if(tb){ tab = tb.dataset.t; renderStep(); $("#tab-"+tab).focus(); return; }
+  const nv = e.target.closest(".d-foot button[data-n]"); if(nv){ openStep(+nv.dataset.n, false); }
+});
+document.addEventListener("keydown", e => {
+  if($("#drawer").hidden) return;
+  if(e.key==="Escape") closeDrawer();
+  if(current && (e.key==="ArrowRight"||e.key==="ArrowLeft") && !e.target.closest(".tab")){
+    const i = byN.findIndex(s=>s.n===current), j = e.key==="ArrowRight" ? i+1 : i-1;
+    if(byN[j]) openStep(byN[j].n);
+  }
+});
+
+const m = (location.hash||"").match(/^#step-(\d+)$/);
+if(m && STEPS.some(s=>s.n===+m[1])) openStep(+m[1]);
+</script>
+
+</body></html>
