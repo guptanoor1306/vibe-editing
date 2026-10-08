@@ -1,9 +1,16 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Vibe Editing Cheat Sheet</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
+[hidden]{display:none!important}
+html,body{margin:0}
+
 /* Layout: an edit timeline. Nine stages run left to right like clips on a track; each stage stacks its step tiles. A step opens a bottom drawer with tabs, so little text shows at once. Light only. */
 :root{
   color-scheme:light;
@@ -61,11 +68,11 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .tile .name{font-weight:500;font-size:14px;line-height:1.3}
 
 /* drawer */
-.backdrop{position:fixed;inset:0;background:rgba(21,24,33,.28);z-index:20}
-.drawer{position:fixed;left:0;right:0;bottom:0;z-index:21;background:var(--surface);border-radius:16px 16px 0 0;box-shadow:0 -10px 40px rgba(21,24,33,.18);max-height:min(78vh,720px);display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom,0px)}
-.drawer-in{max-width:880px;width:100%;margin:0 auto;display:flex;flex-direction:column;min-height:0;flex:1}
-.grab{width:40px;height:4px;border-radius:2px;background:var(--line);margin:10px auto 0}
-.d-head{padding:14px 24px 0;display:flex;gap:16px;align-items:flex-start;justify-content:space-between}
+.backdrop{position:fixed;inset:0;background:rgba(21,24,33,.18);z-index:20}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(540px,100vw);z-index:21;background:var(--surface);border-left:1px solid var(--line);box-shadow:-12px 0 40px rgba(21,24,33,.16);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.drawer-in{width:100%;display:flex;flex-direction:column;min-height:0;flex:1}
+.grab{display:none}
+.d-head{padding:22px 24px 0;display:flex;gap:16px;align-items:flex-start;justify-content:space-between}
 .eyebrow{font-family:var(--mono);font-size:11.5px;color:var(--accent);letter-spacing:.04em;text-transform:uppercase}
 .d-head h3{font-size:24px;line-height:1.15;margin-top:4px}
 .x{all:unset;cursor:pointer;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line);font-size:18px;line-height:1;flex:none}
@@ -111,11 +118,12 @@ body.locked{overflow:hidden}
 @media (prefers-reduced-motion:no-preference){
   .drawer:not([hidden]){animation:up .22s cubic-bezier(.2,.8,.2,1)}
   .backdrop:not([hidden]){animation:fade .2s ease-out}
-  @keyframes up{from{transform:translateY(40px);opacity:.6}to{transform:none;opacity:1}}
+  @keyframes up{from{transform:translateX(48px);opacity:.6}to{transform:none;opacity:1}}
   @keyframes fade{from{opacity:0}to{opacity:1}}
 }
 </style>
-
+</head>
+<body>
 <div class="wrap">
   <div class="top">
     <div>
@@ -371,5 +379,5 @@ document.addEventListener("keydown", e => {
 const m = (location.hash||"").match(/^#step-(\d+)$/);
 if(m && STEPS.some(s=>s.n===+m[1])) openStep(+m[1]);
 </script>
-
-</body></html>
+</body>
+</html>
